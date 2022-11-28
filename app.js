@@ -1,4 +1,5 @@
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 
 const options = {
@@ -7,6 +8,16 @@ const options = {
 };
 
 https.createServer(options, function (req, res) {
+  console.log("Listening on https")
   res.writeHead(200);
   res.end("hello world\n");
 }).listen(443);
+
+
+http.createServer(function (req, res) {
+    console.log("Listening on http for redirect")
+    res.writeHead(302, {
+        location: "https://" + req.headers.host + req.url,
+    });
+    res.end()
+}).listen(80)
