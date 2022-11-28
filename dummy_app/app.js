@@ -21,3 +21,6 @@ http.createServer(function (req, res) {
     });
     res.end()
 }).listen(80)
+
+
+console.log("Server Running on http(s)://VM-WEB-01")
