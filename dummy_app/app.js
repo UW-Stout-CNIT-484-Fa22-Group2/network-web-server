@@ -13,7 +13,6 @@ https.createServer(options, function (req, res) {
   res.end("hello world\n");
 }).listen(443);
 
-
 http.createServer(function (req, res) {
     console.log("Listening on http for redirect")
     res.writeHead(302, {
