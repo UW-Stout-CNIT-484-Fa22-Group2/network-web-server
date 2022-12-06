@@ -1,9 +1,13 @@
 const http = require('http');
 const https = require('https');
 const mysql = require('mysql');
-
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
+
+
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+const csurf = require('csurf');
 
 
 var express = require("express");
@@ -24,17 +28,29 @@ const dbConfig = {
 };
 let dbConnection = mysql.createConnection(dbConfig);
 
-
-
 // express config here
 const app = express();
+
+// Security stuff
 app.use(helmet());
-app.use("/", router);
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(cookieParser());
+app.use(csurf({
+    cookie: true
+}));
+
+//app.use("/", router);
 // serve the react build
-app.use(express.static(webpage_root))
+app.use(express.static(webpage_root));
+
+app.get('/getCSRFToken', (req, res) => {
+    res.json({crsfToken : req.csrfToken() })
+});
 
 // API Endpoints
-router.get('/api/login', (req, res) => {
+app.post('/api/login', (req, res) => {
     // receives a hashed password and a username
     // req.query.username and req.query.password
     let loginError = {
@@ -79,7 +95,12 @@ router.get('/api/login', (req, res) => {
             
         }
     );
-})
+});
+
+app.post("/api/example", (req, res) => {
+
+    res.send(JSON.stringify([]));
+});
 
 var httpsServer = https.createServer(credentials, app);
 

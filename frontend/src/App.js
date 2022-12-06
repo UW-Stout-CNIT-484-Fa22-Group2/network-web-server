@@ -1,5 +1,6 @@
 import './App.css';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import axios from 'axios';
 
 
 function App() {
@@ -8,12 +9,23 @@ function App() {
 
   const [userData, setUserDataLoginResponse] = useState({});
 
+  // run on app startup
+  useEffect(() => {
+    getCSRFToken();
+  }, [])
+
+  function getCSRFToken() {
+    axios.get('/getCSRFToken')
+    .then((response) => {
+      axios.defaults.headers.post['X-CSRF-Token'] = response.data.crsfToken;
+    });
+  }
+
   function login() {
-    fetch(`/api/login?username=${username}&password=${password}`)
-    .then(res => res.json())
-    .then((result) => {
-      setUserDataLoginResponse(result);
-    })
+    axios.post(`/api/login?username=${username}&password=${password}`)
+    .then((response) => {
+      setUserDataLoginResponse(response.data);
+    });
   }
 
   function handleUsernameChange(e) {
