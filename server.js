@@ -1,7 +1,10 @@
 const http = require('http');
 const https = require('https');
+const mysql = require('mysql');
 
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
+
 
 var express = require("express");
 var router = express.Router();
@@ -13,6 +16,15 @@ const credentials = {
     key: fs.readFileSync('keys/key.pem'),
     cert: fs.readFileSync('keys/cert.pem')
 };
+const dbConfig = {
+    host: "localhost",
+    user: "web-server",
+    password: "Websecurity443",
+    database: "cnit484-group2-schema",
+};
+let dbConnection = mysql.createConnection(dbConfig);
+
+
 
 // express config here
 const app = express();
@@ -22,8 +34,51 @@ app.use("/", router);
 app.use(express.static(webpage_root))
 
 // API Endpoints
-router.get('/api/hello', (req, res) => {
-    res.json('hello world')
+router.get('/api/login', (req, res) => {
+    // receives a hashed password and a username
+    // req.query.username and req.query.password
+    let loginError = {
+        code : 401,
+        error : "Invalid Username or Password"
+    }
+    dbConnection.query(
+        "SELECT * FROM users WHERE username = ?",
+        [req.query.username], 
+        (err, dbResult) => {
+            if (err) {
+                // database error
+                res.send(JSON.stringify(err));
+                return;
+            }
+            if (dbResult.length != 1) {
+                // zero or many users returned
+                res.send(JSON.stringify(loginError));
+                return;
+            }
+
+            // only one user returned
+            bcrypt.compare(req.query.password, dbResult[0].password)
+            .then((validPassword) => {
+                if (validPassword) {
+                    // password matches, authentication success
+                    res.send(JSON.stringify(
+                        {
+                            code : 200,
+                            data : {
+                                role : dbResult[0]?.role,
+                                name : dbResult[0]?.displayName,
+                            }
+                        }
+                    ));
+                    return;
+                }
+                res.send(JSON.stringify(loginError));
+            }, (err) => {
+                res.send(JSON.stringify(loginError));
+            });
+            
+        }
+    );
 })
 
 var httpsServer = https.createServer(credentials, app);
