@@ -45,11 +45,12 @@ app.use(csurf({
 // serve the react build
 app.use(express.static(webpage_root));
 
+// get a Cross-site request forgery token
 app.get('/getCSRFToken', (req, res) => {
     res.json({crsfToken : req.csrfToken() })
 });
 
-// API Endpoints
+// API Endpoints (protected by CSRF)
 app.post('/api/login', (req, res) => {
     // receives a hashed password and a username
     // req.query.username and req.query.password
