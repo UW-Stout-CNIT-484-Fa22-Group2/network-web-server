@@ -21,12 +21,13 @@ const credentials = {
     cert: fs.readFileSync('keys/cert.pem')
 };
 const dbConfig = {
+    connectionLimit: 10,
     host: "localhost",
     user: "web-server",
     password: "Websecurity443",
     database: "cnit484-group2-schema",
 };
-let dbConnection = mysql.createConnection(dbConfig);
+let dbConnection = mysql.createPool(dbConfig);
 
 // express config here
 const app = express();
