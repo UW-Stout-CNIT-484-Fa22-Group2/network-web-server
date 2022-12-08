@@ -39,7 +39,11 @@ function App() {
   function login() {
     axios.post(`/api/login?username=${username}&password=${password}`)
     .then((response) => {
-      setUserDataLoginResponse(response.data);
+      if (response.data.code == 200) {
+        setUserDataLoginResponse(response.data.data)
+      } else {
+        setUserDataLoginResponse(response.data);
+      }
     }, (err) => {
       console.log("Could not login.")
     });
@@ -72,6 +76,9 @@ function App() {
           </button>
         </p>
         <br></br>
+        <p>
+          {JSON.stringify(userData)}
+        </p>
       </p>
     </div>
   );
